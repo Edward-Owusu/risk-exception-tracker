@@ -54,15 +54,18 @@ def timeline_svg(report: Report, include_closed: bool = False, width: int = 960)
         return label_w + plot_w * (d - lo).days / span
 
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" role="img" '
-           f'aria-label="Exception expiry timeline" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">']
+           f'aria-label="Exception expiry timeline" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">',
+           '<style>.halo{paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}</style>']
     # month grid
+    xa = x(as_of)
     m = lo
     while m <= hi:
         xm = x(m)
         out.append(f'<line x1="{xm:.1f}" y1="{top - 4}" x2="{xm:.1f}" y2="{height - 8}" stroke="#E4E7EC" />')
-        if m.month in (1, 4, 7, 10) or span < 400:
+        if (m.month in (1, 4, 7, 10) or span < 400) and abs(xm + 25 - xa) > 40:
             out.append(f'<text x="{xm + 3:.1f}" y="{top - 8}" fill="#667085">{m.strftime("%b %Y")}</text>')
         m = (m.replace(day=28) + timedelta(days=4)).replace(day=1)
+    notes = []  # text on the plot area, drawn last so the as-of line passes behind it
     for i, r in enumerate(rows):
         e = r.exception
         y = top + i * row_h
@@ -73,12 +76,12 @@ def timeline_svg(report: Report, include_closed: bool = False, width: int = 960)
         out.append(f'<text x="8" y="{y + 16}" fill="#101828"><title>{escape(e.title)}</title>{escape(label)}</text>')
         start = e.approved_date or lo
         if e.status == "pending" and not e.approved_date:
-            out.append(f'<text x="{label_w + 6}" y="{y + 17}" fill="{color}" font-style="italic">awaiting approval</text>')
+            notes.append(f'<text class="halo" x="{label_w + 6}" y="{y + 17}" fill="{color}" font-style="italic">awaiting approval</text>')
         elif not e.approved_date and e.expiry_date:
             xe = x(e.expiry_date)
             out.append(f'<path d="M{xe:.1f} {y + 5} l7 8 l-7 8 l-7 -8 z" fill="{color}"><title>{escape(e.exception_id)}: '
                        f'expires {_d(e.expiry_date)}, never approved</title></path>')
-            out.append(f'<text x="{xe - 12:.1f}" y="{y + 17}" text-anchor="end" fill="{color}" font-style="italic">'
+            notes.append(f'<text class="halo" x="{xe - 12:.1f}" y="{y + 17}" text-anchor="end" fill="{color}" font-style="italic">'
                        f'no approval recorded</text>')
         elif e.expiry_date:
             x1, x2 = x(start), x(e.expiry_date)
@@ -90,13 +93,13 @@ def timeline_svg(report: Report, include_closed: bool = False, width: int = 960)
             out.append(f'<rect x="{x1:.1f}" y="{y + 6}" width="{label_w + plot_w - x1:.1f}" height="14" rx="3" '
                        f'fill="none" stroke="{color}" stroke-width="2" stroke-dasharray="5 3"><title>{escape(e.exception_id)}: '
                        f'no expiry date</title></rect>')
-            out.append(f'<text x="{label_w + plot_w - 4:.1f}" y="{y + 17}" text-anchor="end" fill="{color}">no expiry</text>')
+            notes.append(f'<text class="halo" x="{label_w + plot_w - 4:.1f}" y="{y + 17}" text-anchor="end" fill="{color}">no expiry</text>')
         if r.findings:
             out.append(f'<circle cx="{label_w - 12}" cy="{y + 13}" r="5" fill="{SEV_COLORS[r.worst]}">'
                        f'<title>{len(r.findings)} finding(s), worst {r.worst}</title></circle>')
-    xa = x(as_of)
     out.append(f'<line x1="{xa:.1f}" y1="{top - 22}" x2="{xa:.1f}" y2="{height - 6}" stroke="#101828" stroke-width="2" />')
     out.append(f'<text x="{xa:.1f}" y="{top - 26}" text-anchor="middle" fill="#101828" font-weight="600">as of {as_of.isoformat()}</text>')
+    out.extend(notes)
     out.append("</svg>")
     return "".join(out)
 
