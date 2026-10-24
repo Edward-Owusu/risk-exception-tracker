@@ -37,7 +37,7 @@ st.set_page_config(page_title="Risk Exception Tracker", page_icon="📒", layout
 st.markdown("""
 <style>
 [data-testid="stSidebar"], [data-testid="collapsedControl"] { display: none; }
-.block-container { padding-top: 1.2rem; max-width: 1240px; }
+.block-container { padding-top: 3.6rem; max-width: 1240px; }
 .rx-band { background: #0F2A24; color: #F4F1EA; border-radius: 14px; padding: 22px 26px 18px; margin-bottom: 14px; }
 .rx-band h1 { font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 600; margin: 0; color: #F4F1EA; padding: 0; }
 .rx-band p { margin: 4px 0 0; color: #B9C7C1; font-size: 14.5px; }
@@ -58,6 +58,10 @@ st.markdown("""
 .rx-find .f { color: #1F6F5C; font-size: 13.5px; }
 .rx-find .r { color: #667085; font-size: 12px; }
 .rx-empty { color: #98A2B3; font-size: 13px; padding: 10px 4px; }
+.rx-card details { margin-top: 8px; border-top: 1px solid #EEF0F3; padding-top: 6px; }
+.rx-card summary { cursor: pointer; font-size: 12.5px; font-weight: 600; color: #1F6F5C; }
+.rx-card details ul { margin: 6px 0 0; padding-left: 16px; }
+.rx-card details li { font-size: 12.5px; color: #344054; margin-bottom: 4px; line-height: 1.35; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -255,15 +259,16 @@ elif view == "Lifecycle board" and report:
                     when = "no expiry date"
                 badge = (pill(f"{len(r.findings)} finding{'s' if len(r.findings) != 1 else ''}", SEV_COLORS[r.worst])
                          if r.findings else (pill("well governed", "#1F6F5C") if e.status == "active" else ""))
+                details = ""
+                if r.findings:
+                    items = "".join(f"<li><b>{escape(f.rule_id)}</b> ({escape(f.severity)}) {escape(f.title)}. "
+                                    f"{escape(f.detail)}</li>" for f in r.findings)
+                    details = f"<details><summary>Show findings</summary><ul>{items}</ul></details>"
                 st.markdown(f'<div class="rx-card" style="border-left-color:{LANE_COLORS[lane]}">'
                             f'<div class="id">{escape(e.exception_id)}</div><div class="t">{escape(e.title)}</div>'
                             f'{pill(risk, risk_color)}{badge}'
                             f'<div class="m" style="margin-top:6px">Owner: {escape(e.risk_owner or "none")}<br>{escape(when)}</div>'
-                            f'</div>', unsafe_allow_html=True)
-                if r.findings:
-                    with st.expander("Findings", expanded=False):
-                        for f in r.findings:
-                            st.markdown(f"**{f.rule_id}** ({f.severity}) {f.title}. {f.detail}")
+                            f'{details}</div>', unsafe_allow_html=True)
 
 elif view == "Expiry timeline" and report:
     show_closed = st.toggle("Include closed exceptions", value=False)
@@ -296,17 +301,31 @@ elif view == "Edit register":
     edited = st.data_editor(
         frame, key=f"editor_{st.session_state['editor_version']}", num_rows="dynamic", use_container_width=True,
         hide_index=True, height=440,
+        column_order=["exception_id", "title", "risk_level", "status", "risk_owner", "approved_by", "approver_role",
+                      "approved_date", "expiry_date", "compensating_control", "control_verified_date",
+                      "remediation_plan", "remediation_due", "renewal_count", "requested_by", "policy_or_standard",
+                      "control_refs", "scope", "reason", "closed_date"],
         column_config={
-            "exception_id": cc.TextColumn("ID", required=True, width="small"),
-            "title": cc.TextColumn("Exception", width="medium"),
-            "risk_level": cc.SelectboxColumn("Risk", options=levels),
-            "status": cc.SelectboxColumn("Status", options=["active", "pending", "closed"], default="active"),
-            "approved_date": cc.DateColumn("Approved"),
-            "expiry_date": cc.DateColumn("Expires"),
-            "control_verified_date": cc.DateColumn("Control verified"),
-            "remediation_due": cc.DateColumn("Fix due"),
-            "closed_date": cc.DateColumn("Closed"),
-            "renewal_count": cc.NumberColumn("Renewals", min_value=0, step=1, default=0),
+            "exception_id": cc.TextColumn("ID", required=True, width=120),
+            "title": cc.TextColumn("Exception", width="large"),
+            "risk_level": cc.SelectboxColumn("Risk", options=levels, width=95),
+            "status": cc.SelectboxColumn("Status", options=["active", "pending", "closed"], default="active", width=95),
+            "risk_owner": cc.TextColumn("Risk owner", width="medium"),
+            "approved_by": cc.TextColumn("Approved by", width="medium"),
+            "approver_role": cc.TextColumn("Approver role", width="medium"),
+            "approved_date": cc.DateColumn("Approved on", width=115),
+            "expiry_date": cc.DateColumn("Expires", width=115),
+            "compensating_control": cc.TextColumn("Compensating control", width="large"),
+            "control_verified_date": cc.DateColumn("Control verified", width=125),
+            "remediation_plan": cc.TextColumn("Fix plan", width="large"),
+            "remediation_due": cc.DateColumn("Fix due", width=115),
+            "renewal_count": cc.NumberColumn("Renewals", min_value=0, step=1, default=0, width=85),
+            "requested_by": cc.TextColumn("Requested by", width="medium"),
+            "policy_or_standard": cc.TextColumn("Policy", width="large"),
+            "control_refs": cc.TextColumn("Controls", width="small"),
+            "scope": cc.TextColumn("Scope", width="medium"),
+            "reason": cc.TextColumn("Reason", width="large"),
+            "closed_date": cc.DateColumn("Closed on", width=115),
         })
     b1, b2, _ = st.columns([1.2, 1.2, 3])
     with b1:
@@ -333,13 +352,16 @@ elif view == "Acceptance memo" and report:
         choice = st.selectbox("Exception", list(options))
         res = options[choice]
         m1, m2, _ = st.columns([1.2, 1.2, 3])
-        m1.download_button("Download memo (Word-friendly HTML)",
+        m1.download_button("Memo for Word (HTML)",
                            acceptance_memo(res, report.organization, report.as_of, fmt="html"),
                            f"risk_acceptance_{res.exception.exception_id}.html", "text/html", use_container_width=True)
-        m2.download_button("Download memo (Markdown)", acceptance_memo(res, report.organization, report.as_of),
+        m2.download_button("Memo (Markdown)", acceptance_memo(res, report.organization, report.as_of),
                            f"risk_acceptance_{res.exception.exception_id}.md", "text/markdown", use_container_width=True)
         with st.container(border=True):
-            st.markdown(acceptance_memo(res, report.organization, report.as_of))
+            # Show the memo's headings one level smaller so they fit the page.
+            memo = acceptance_memo(res, report.organization, report.as_of)
+            st.markdown("\n".join("#### " + ln[2:] if ln.startswith("# ") else "##### " + ln[3:] if ln.startswith("## ")
+                                   else ln for ln in memo.split("\n")))
     else:
         st.info("There are no open exceptions to write a memo for.")
 
