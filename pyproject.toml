@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "risk-exception-tracker"
+version = "0.1.0"
+description = "Track security policy exceptions and risk acceptances, and flag the ones that are no longer governed"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Edward Owusu"}]
+keywords = ["risk acceptance", "policy exception", "risk register", "grc", "nist", "iso 27001", "csf", "audit"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+  "Intended Audience :: Information Technology",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dashboard = ["streamlit>=1.40", "pandas>=2.0"]
+
+[project.scripts]
+risk-exceptions = "risk_exceptions.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+risk_exceptions = ["data/*.json"]

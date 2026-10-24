@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "risk_exceptions: A Risk Exception and Risk Acceptance Tracker for Small and Mid-Sized Organizations"
+authors:
+  - family-names: Owusu
+    given-names: Edward
+version: 0.1.0
+date-released: 2026-10-24
+license: MIT
+repository-code: "https://github.com/Edward-Owusu/risk-exception-tracker"
+keywords:
+  - risk acceptance
+  - policy exceptions
+  - risk management
+  - NIST SP 800-53
+  - NIST Cybersecurity Framework
+  - ISO/IEC 27001
+  - small business

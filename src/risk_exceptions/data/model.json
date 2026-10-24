@@ -1,0 +1,33 @@
+{
+  "_about": "Scoring model and organization-defined values. Copy this file, change values, and pass it with --model. Keys you leave out keep their defaults.",
+  "risk_levels": ["low", "medium", "high", "critical"],
+  "weights": {"critical": 10, "high": 6, "medium": 3, "low": 1},
+  "max_duration_days": {"critical": 90, "high": 180, "medium": 365, "low": 365},
+  "authority_by_role": {
+    "team lead": "low",
+    "supervisor": "low",
+    "manager": "medium",
+    "it manager": "medium",
+    "director": "high",
+    "vp": "high",
+    "vice president": "high",
+    "ciso": "critical",
+    "cio": "critical",
+    "cfo": "critical",
+    "coo": "critical",
+    "ceo": "critical",
+    "president": "critical",
+    "owner": "critical",
+    "executive": "critical"
+  },
+  "compensating_control_required_for": ["high", "critical"],
+  "control_verification_days": 90,
+  "expiring_soon_days": 30,
+  "max_renewals": 2,
+  "health_bands": [
+    {"min": 85, "label": "Healthy"},
+    {"min": 65, "label": "Needs attention"},
+    {"min": 40, "label": "Weak"},
+    {"min": 0, "label": "Out of control"}
+  ]
+}

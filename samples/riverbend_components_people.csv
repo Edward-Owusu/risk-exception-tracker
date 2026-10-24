@@ -1,0 +1,9 @@
+name,title,approval_limit,status,left_date
+Dana Whitfield,Chief Executive Officer,critical,active,
+Priya Raman,Operations Director,high,active,
+Marcus Lee,IT Manager,medium,active,
+Jordan Price,Finance Manager,medium,active,
+Tom Becker,Plant Manager,medium,active,
+Kim Sato,Systems Administrator,none,active,
+Alan Ortiz,IT Director,high,left,2026-03-31
+Lisa Grant,Quality Manager,low,left,2026-06-15
