@@ -3,6 +3,7 @@
 [![tests](https://github.com/Edward-Owusu/risk-exception-tracker/actions/workflows/tests.yml/badge.svg)](https://github.com/Edward-Owusu/risk-exception-tracker/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://risk-exception-tracker.streamlit.app)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23615549.svg)](https://doi.org/10.5281/zenodo.23615549)
 
 An open-source register and checker for **security policy exceptions and risk acceptances**. It finds the exceptions that are no longer governed: expired but still in use, approved by someone without the authority, owned by someone who has left, missing a compensating control, or renewed again and again with no plan to fix the underlying problem.
 
