@@ -1,0 +1,11 @@
+# Theme for this tool: deep ledger green on warm paper, distinct from the other tools in the series.
+[theme]
+base = "light"
+primaryColor = "#1F6F5C"
+backgroundColor = "#FBFAF7"
+secondaryBackgroundColor = "#EEF2EF"
+textColor = "#101828"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"
